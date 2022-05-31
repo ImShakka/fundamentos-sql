@@ -83,6 +83,10 @@ SELECT a.matricula,
 	   WHERE a.matricula = 2022501524;
 
 -- Selecionar um dado especifico, no caso, por nome
+-- O caractere % é um coringa, significa qualquer quantidade de caracteres digitados com %
+-- Exemplo: M% qualquer variavel que tenha M no inicio 
+-- Exemplo: %M qualquer variavel que tenha M no fim
+-- Exemplo: %M% qualquer variavel que tenha M em qualquer lugar 
 -- LIKE serve para filtrar por caracteres, por exemplo, M% procura todos os dados onde existe a letra M
 SELECT a.matricula,
 	   a.nome,
@@ -97,3 +101,148 @@ SELECT c.nome,
 SELECT t.nome,
 	   t.data_inicio,
 	   t.data_fim FROM "banco".turma t;
+	   
+
+-- **********************
+-- Aula 05 - 31/05/2022
+-- **********************
+
+-- Exemplo Instrução DQL
+
+-- Pode associar um apelido para cada caluna para visualizar os dados
+SELECT a.matricula       as Matricula,
+	   a.nome            as Nome,
+	   a.sexo            as Sexo,
+	   a.data_nascimento as Data_de_Nascimento from "banco".aluno a;
+
+-- Procurar por valores terminados em LINS
+SELECT a.matricula,
+	   a.nome,
+	   a.sexo,
+	   a.data_nascimento FROM "banco".aluno a
+	   WHERE a.nome LIKE '%LINS'
+	   ORDER BY a.nome ASC;
+
+-- Procurar por valores que contenham AN
+SELECT a.matricula,
+	   a.nome,
+	   a.sexo,
+	   a.data_nascimento FROM "banco".aluno a
+	   WHERE a.nome LIKE '%AN%'
+	   ORDER BY a.nome ASC;
+
+-- O caractere _ é um coringa, que representa uma letra e precisa ser exatamente naquela posicao
+-- O caractere % é um coringa, que representa um conjunto de caractere que nao interessa quantidade de caractere
+-- Seleciona todos os registros não importa a PRIMEIRA LETRA _ e a partir do segundo, que contenha A e nao importa o que venha depois
+SELECT a.matricula,
+	   a.nome,
+	   a.sexo,
+	   a.data_nascimento FROM "banco".aluno a
+	   WHERE a.nome LIKE '_A%'
+	   ORDER BY a.nome ASC;
+	   
+-- Cláusula ILIKE ( não é case-sensitive) filtra caracteres de forma universal, independente se os caracteres sao maiusculos ou minusculos
+SELECT a.matricula,
+	   a.nome,
+	   a.sexo,
+	   a.data_nascimento FROM "banco".aluno a
+	   WHERE a.nome ILIKE '%PEDRO%'
+	   ORDER BY a.nome ASC;
+
+SELECT a.matricula,
+	   a.nome,
+	   a.sexo,
+	   a.data_nascimento FROM "banco".aluno a
+	   WHERE a.nome ILIKE '%pedro%'
+	   ORDER BY a.nome ASC;
+	   
+-- **************************
+
+-- Tipo Data
+-- to_char: converte um tipo data em caractere segundo uma formatação
+
+SELECT a.matricula,
+	   a.nome,
+	   a.sexo,
+	   to_char(a.data_nascimento, 'DD/MM/YYYY') as data_nascimento from "banco".aluno a;
+	   
+-- Converte o tipo data em caractere: dia, mês e ano
+SELECT a.matricula,
+       a.nome,
+	   a.sexo,
+	   to_char(a.data_nascimento, 'DD') as Dia,
+	   to_char(a.data_nascimento, 'MM') as Mes,
+	   to_char(a.data_nascimento, 'YYYY') as Ano from "banco".aluno a;
+
+-- Extrai o dia, mês e ano como numérico
+SELECT a.matricula,
+       a.nome,
+	   a.sexo,
+	   EXTRACT('Day' from a.data_nascimento) as Dia,
+	   EXTRACT('Month' from a.data_nascimento) as Mes,
+	   EXTRACT('Year' from a.data_nascimento) as Ano from "banco".aluno a;
+
+-- Apenas os alunos que nasceram em 1998 ou 1999
+SELECT a.matricula,
+       a.nome,
+	   a.sexo,
+	   EXTRACT('Day' from a.data_nascimento) as Dia,
+	   EXTRACT('Month' from a.data_nascimento) as Mes,
+	   EXTRACT('Year' from a.data_nascimento) as Ano from "banco".aluno a
+	   WHERE EXTRACT('Year' from a.data_nascimento) IN (1998,1999)
+	   ORDER BY a.nome ASC;
+
+-- Apenas os alunos que nasceram entre 2000 e 2010
+SELECT a.matricula,
+       a.nome,
+	   a.sexo,
+	   EXTRACT('Day' from a.data_nascimento) as Dia,
+	   EXTRACT('Month' from a.data_nascimento) as Mes,
+	   EXTRACT('Year' from a.data_nascimento) as Ano from "banco".aluno a
+	   WHERE EXTRACT('Year' from a.data_nascimento) BETWEEN 2000 AND 2010
+	   ORDER BY a.nome ASC;
+
+-- Ordenar os alunos por idade crescente
+-- Invés de current_date, também existe o now() porém ele pega as horas também além da data atual
+SELECT a.matricula,
+	   a.nome,
+	   a.sexo,
+	   to_char(a.data_nascimento, 'DD/MM/YYYY') as data_nascimento,
+	   EXTRACT('Year' from current_date) - EXTRACT('Year' from a.data_nascimento) as idade from "banco".aluno a
+	   ORDER BY idade ASC;
+
+-- Ordenar os alunos por idade crescente utilizando a função age
+SELECT a.matricula,
+	   a.nome,
+	   a.sexo,
+	   to_char(a.data_nascimento, 'DD/MM/YYYY') as data_nascimento,
+	   age(current_date, a.data_nascimento) as idade from "banco".aluno a
+	   ORDER BY idade ASC;
+
+-- Determinar a quantidade de registros na tabela
+SELECT COUNT(a.matricula) Quantidade_Registro from "banco".aluno a
+
+-- Selecionar a MENOR idade
+SELECT MIN (EXTRACT('Year' from current_date) - EXTRACT('Year' from a.data_nascimento)) as menor_idade from "banco".aluno a
+
+-- Selecionar a MAIOR idade
+SELECT MAX (EXTRACT('Year' from current_date) - EXTRACT('Year' from a.data_nascimento)) as maior_idade from "banco".aluno a
+
+-- SELECT de SELECT: MENOR idade
+SELECT a.matricula,
+	   a.nome,
+	   a.sexo,
+	   to_char(a.data_nascimento, 'DD/MM/YYYY') as data_nascimento,
+	   EXTRACT('Year' from age(current_date, a.data_nascimento)) as idade from "banco".aluno a
+	   WHERE EXTRACT('Year' from age(current_date, a.data_nascimento)) =
+	   (SELECT MIN(EXTRACT('Year' from age(current_date, a.data_nascimento))) as menor_idade from "banco".aluno a)
+	   ORDER BY a.nome ASC;
+	   
+SELECT a.matricula,
+	   a.nome,
+	   a.sexo,
+	   to_char(a.data_nascimento, 'DD/MM/YYYY') as data_nascimento,
+	   EXTRACT('Year' from age(current_date, a.data_nascimento)) as idade from "banco".aluno a
+	   WHERE EXTRACT('Year' from age(current_date, a.data_nascimento)) =
+	   (SELECT MAX(EXTRACT('Year' from age(current_date, a.data_nascimento))) as maior_idade from "banco".aluno a)
+	   ORDER BY a.nome ASC;
