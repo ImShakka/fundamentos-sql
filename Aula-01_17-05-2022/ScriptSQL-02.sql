@@ -156,6 +156,12 @@ SELECT a.matricula,
 	   WHERE a.nome ILIKE '%pedro%'
 	   ORDER BY a.nome ASC;
 	   
+-- SELECT com uma expressão condicional
+SELECT a.matricula,
+	   a.nome,
+	   CASE WHEN a.sexo='M' THEN 'Masculino' WHEN a.sexo='F' THEN 'Feminino' END,
+	   to_char(a.data_nascimento, 'DD/MM/YYYY') as data_nascimento from "banco".aluno a
+	   
 -- **************************
 
 -- Tipo Data
@@ -246,3 +252,62 @@ SELECT a.matricula,
 	   WHERE EXTRACT('Year' from age(current_date, a.data_nascimento)) =
 	   (SELECT MAX(EXTRACT('Year' from age(current_date, a.data_nascimento))) as maior_idade from "banco".aluno a)
 	   ORDER BY a.nome ASC;
+	   
+-- **********************
+-- Aula 06 - 02/06/2022
+-- **********************
+
+-- **********************************
+-- SELECT Relacionamento
+-- **********************************
+
+-- Tabela: curso_fic
+SELECT c.id, c.nome, c.carga_horaria from "banco".curso_fic c;
+
+UPDATE "banco".curso_fic
+SET nome = 'Fundamentos de SQL'
+WHERE id=1;
+
+UPDATE "banco".curso_fic
+SET nome = 'Programação Web'
+WHERE id=2;
+
+-- Tabela: turma
+SELECT t.id, t.nome, t.data_inicio, t.data_fim, t.curso from "banco".turma t;
+
+-- Relacionamento entre as tabelas aluno e turma: tabela matriculado
+
+-- Tabela: aluno
+SELECT a.matricula, a.nome, a.sexo, to_char(a.data_nascimento, 'DD/MM/YYYY') as data_nascimento from "banco".aluno a ORDER BY a.nome;
+
+-- Tabela: matriculado
+SELECT m.id, m.turma, m.aluno from "banco".matriculado m;
+
+-- Fazer a inscrição na tabela matriculado, com os alunos presentes na sala de aula
+
+INSERT INTO "banco".matriculado (turma, aluno) VALUES (1,2022501542);
+INSERT INTO "banco".matriculado (turma, aluno) VALUES (1,2022501453);
+INSERT INTO "banco".matriculado (turma, aluno) VALUES (1,2022501480);
+INSERT INTO "banco".matriculado (turma, aluno) VALUES (1,2022501604);
+INSERT INTO "banco".matriculado (turma, aluno) VALUES (1,2022501533);
+INSERT INTO "banco".matriculado (turma, aluno) VALUES (1,2022501570);
+INSERT INTO "banco".matriculado (turma, aluno) VALUES (1,2022501490);
+INSERT INTO "banco".matriculado (turma, aluno) VALUES (1,2022501462);
+INSERT INTO "banco".matriculado (turma, aluno) VALUES (1,2022501551);
+INSERT INTO "banco".matriculado (turma, aluno) VALUES (1,2022501524);
+INSERT INTO "banco".matriculado (turma, aluno) VALUES (1,2022501506);
+
+-- INNER JOIN
+-- Tabela curso_fic e turma
+
+SELECT
+	c.id as id_curso,
+	c.nome,
+	c.carga_horaria,
+	t.id as id_turma,
+	t.nome,
+	t.data_inicio,
+	t.data_fim,
+	t.curso
+FROM "banco".curso_fic c
+INNER JOIN "banco".turma t ON c.id = t.curso;
