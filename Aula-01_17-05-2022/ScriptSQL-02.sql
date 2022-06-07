@@ -10,35 +10,20 @@
 
 -- Inserir na tabela aluno
 INSERT INTO "banco".aluno(matricula, nome, sexo, data_nascimento) VALUES (2022501453,'AMON MENEZES NEGREIROS','M','2001-08-31');
-
 INSERT INTO "banco".aluno(matricula, nome, sexo, data_nascimento) VALUES (2022501462,'ANGEL GABRIEL DE SOUZA SALES','M','2001-01-31');
-
 INSERT INTO "banco".aluno(matricula, nome, sexo, data_nascimento) VALUES (2022501471 ,'GABRIEL HENRIQUE FAUST','M','2001-02-25');
-
 INSERT INTO "banco".aluno(matricula, nome, sexo, data_nascimento) VALUES (2022501480,'HENRIQUE FREITAS BARKETT','M','1998-07-01');
-
 INSERT INTO "banco".aluno(matricula, nome, sexo, data_nascimento) VALUES (2022501490,'JOAO BATISTA PEREIRA DE OLIVEIRA','M','2001-07-24');
-
 INSERT INTO "banco".aluno(matricula, nome, sexo, data_nascimento) VALUES (2022501506,'KALIL VINICIUS ANDRADE CARNEIRO','M','1999-09-23');
-
 INSERT INTO "banco".aluno(matricula, nome, sexo, data_nascimento) VALUES (2022501515,'LUANA VIEIRA LINS','F','1999-03-07');
-
 INSERT INTO "banco".aluno(matricula, nome, sexo, data_nascimento) VALUES (2022501604,'LUAN GABRIEL FERNANDES AIEZZA','M','2001-04-06');
-
 INSERT INTO "banco".aluno(matricula, nome, sexo, data_nascimento) VALUES (2022501524,'MATHEUS FERNANDES OLIVEIRA','M','2001-07-27');
-
 INSERT INTO "banco".aluno(matricula, nome, sexo, data_nascimento) VALUES (2022501533,'MIQUEIAS CAVALCANTI CRISPIM','M','2000-10-23');
-
 INSERT INTO "banco".aluno(matricula, nome, sexo, data_nascimento) VALUES (2022501542,'PEDRO CARVALHO ALMEIDA','M','2002-03-02');
-
 INSERT INTO "banco".aluno(matricula, nome, sexo, data_nascimento) VALUES (2022501551,'PEDRO HENRIQUE LOPES VASCONCELOS','M','2001-09-03');
-
 INSERT INTO "banco".aluno(matricula, nome, sexo, data_nascimento) VALUES(2022501560,'RODRIGO MALKA RODRIGUES MARQUES', 'M', '2001-07-15');
-
 INSERT INTO "banco".aluno(matricula, nome, sexo, data_nascimento) VALUES (2022501570,'SERGIO JUNIORS GARCEZ','M','2001-12-22');
-
 INSERT INTO "banco".aluno(matricula, nome, sexo, data_nascimento) VALUES (2022501589,'STELLA APARECIDA HENRIQUE DA SILVA','F','1999-11-05');
-
 INSERT INTO "banco".aluno(matricula, nome, sexo, data_nascimento) VALUES (2022501598 ,'THIAGO MUNIZ DE SOUZA','M','1998-11-05');
 
 -- Inserir na tabela curso FIC
@@ -296,10 +281,11 @@ INSERT INTO "banco".matriculado (turma, aluno) VALUES (1,2022501462);
 INSERT INTO "banco".matriculado (turma, aluno) VALUES (1,2022501551);
 INSERT INTO "banco".matriculado (turma, aluno) VALUES (1,2022501524);
 INSERT INTO "banco".matriculado (turma, aluno) VALUES (1,2022501506);
+INSERT INTO "banco".matriculado (turma, aluno) VALUES (1,2022501515);
 
 -- INNER JOIN
 -- Tabela curso_fic e turma
-
+-- Listar todos os CURSOS com as suas respectivas TURMAS
 SELECT
 	c.id as id_curso,
 	c.nome,
@@ -311,3 +297,106 @@ SELECT
 	t.curso
 FROM "banco".curso_fic c
 INNER JOIN "banco".turma t ON c.id = t.curso;
+
+-- **********************
+-- Aula 07 - 07/06/2022
+-- **********************
+
+-- Inserir na tabela: "banco".turma
+INSERT INTO "banco".turma (nome,data_inicio,data_fim,curso) VALUES ('Turma Programação Web 01','2022-07-15','2022-08-25',2);
+
+-- **********************
+-- LEFT JOIN
+-- **********************
+
+-- Tabelas: aluno, matriculado, turma e curso
+-- Listar todos os alunos(a)
+SELECT 
+	a.matricula,
+	a.nome as nome_aluno,
+	CASE WHEN a.sexo='M' THEN 'Masculino' WHEN a.sexo='F' THEN 'Feminino' END,
+	to_char(a.data_nascimento,'DD/MM/YYYY') as data_nascimento,
+	t.id as id_turma,
+	t.nome as nome_turma,
+	t.data_inicio,
+	t.data_fim,
+	c.id as id_curso,
+	c.nome as nome_curso,
+	c.carga_horaria
+FROM "banco".aluno a
+LEFT JOIN "banco".matriculado m ON a.matricula = m.aluno
+LEFT JOIN "banco".turma       t ON m.turma     = t.id
+LEFT JOIN "banco".curso_fic   c ON t.curso     = c.id
+ORDER BY a.nome;
+
+-- Tabelas: aluno, matriculado e turma
+-- Listar todas os alunos(a) NÃO matriculado na turma
+SELECT 
+	a.matricula,
+	a.nome as nome_aluno,
+	CASE WHEN a.sexo='M' THEN 'Masculino' WHEN a.sexo='F' THEN 'Feminino' END,
+	to_char(a.data_nascimento,'DD/MM/YYYY') as data_nascimento,
+	t.id as id_turma,
+	t.nome as nome_turma,
+	t.data_inicio,
+	t.data_fim
+FROM "banco".aluno a
+LEFT OUTER JOIN "banco".matriculado m ON a.matricula = m.aluno -- LEFT OUTER e LEFT é a mesma coisa nessa situação
+LEFT OUTER JOIN "banco".turma       t ON m.turma     = t.id    --                  ||                   
+WHERE t.id IS NULL -- Indica aluno não matriculado na turma
+ORDER BY a.nome;
+
+-- **********************
+-- RIGHT JOIN
+-- **********************
+
+-- Tabelas: aluno, matriculado e turma
+-- Listar todos os alunos(a) matriculados e TODAS as TURMAS
+SELECT 
+	a.matricula,
+	a.nome as nome_aluno,
+	CASE WHEN a.sexo='M' THEN 'Masculino' WHEN a.sexo='F' THEN 'Feminino' END,
+	to_char(a.data_nascimento,'DD/MM/YYYY') as data_nascimento,
+	t.id as id_turma,
+	t.nome as nome_turma,
+	t.data_inicio,
+	t.data_fim,
+	t.curso
+FROM "banco".aluno a
+RIGHT JOIN "banco".matriculado m ON a.matricula = m.aluno
+RIGHT JOIN "banco".turma       t ON m.turma     = t.id
+ORDER BY a.nome;
+
+-- Tabelas: aluno, matriculado e turma
+-- Listar todos os alunos(a) matriculados e NÃO matriculados em TODAS as TURMAS
+SELECT 
+	a.matricula,
+	a.nome as nome_aluno,
+	CASE WHEN a.sexo='M' THEN 'Masculino' WHEN a.sexo='F' THEN 'Feminino' END,
+	to_char(a.data_nascimento,'DD/MM/YYYY') as data_nascimento,
+	t.id as id_turma,
+	t.nome as nome_turma,
+	t.data_inicio,
+	t.data_fim,
+	t.curso
+FROM "banco".aluno a
+FULL JOIN "banco".matriculado m ON a.matricula = m.aluno
+FULL JOIN "banco".turma       t ON m.turma     = t.id
+ORDER BY a.nome;
+
+-- Tabelas: aluno e turma
+-- Listar todos os alunos(a) com as possíveis turmas
+-- As turmas que um aluno pode se cadastrar
+SELECT 
+	a.matricula,
+	a.nome as nome_aluno,
+	CASE WHEN a.sexo='M' THEN 'Masculino' WHEN a.sexo='F' THEN 'Feminino' END,
+	to_char(a.data_nascimento,'DD/MM/YYYY') as data_nascimento,
+	t.id as id_turma,
+	t.nome as nome_turma,
+	t.data_inicio,
+	t.data_fim,
+	t.curso
+FROM "banco".aluno a
+CROSS JOIN "banco".turma t
+ORDER BY a.nome;
