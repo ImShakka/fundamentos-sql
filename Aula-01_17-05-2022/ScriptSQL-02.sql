@@ -400,3 +400,64 @@ SELECT
 FROM "banco".aluno a
 CROSS JOIN "banco".turma t
 ORDER BY a.nome;
+
+-- *******************
+-- Aula 08 - 09/06/2022
+-- *******************
+
+SELECT m.id, m.turma, m.aluno
+FROM "banco".matriculado m;
+
+-- Inserir na tabela nota
+INSERT INTO "banco".nota (nota1, nota2, nota3, matriculado) VALUES (5.5, 7.5, 6.5, 1);
+INSERT INTO "banco".nota (nota1, nota2, nota3, matriculado) VALUES (3.5, 4.5, 5.5, 2);
+INSERT INTO "banco".nota (nota1, nota2, nota3, matriculado) VALUES (6.2, 5.7, 7.9, 3);
+-- Forçando colocar um dado onde é trabalho de um trigger: ele ignora e pega o valor resultado do trigger
+INSERT INTO "banco".nota (nota1, nota2, nota3, matriculado, media, situacao) VALUES (3.5, 2.5, 4.5, 4, 9.0, 'H');
+
+SELECT * FROM "banco".nota;
+
+-- aluno matriculado turma nota
+SELECT 
+	a.matricula,
+	a.nome as nome_aluno,
+	CASE WHEN a.sexo='M' THEN 'Masculino' WHEN a.sexo='F' THEN 'Feminino' END AS sexo,
+	to_char(a.data_nascimento,'DD/MM/YYYY') as data_nascimento,
+	t.id as id_turma,
+	t.nome as nome_turma,
+	t.data_inicio,
+	t.data_fim,
+	n.nota1,
+	n.nota2,
+	n.nota3,
+	n.media,
+	CASE WHEN n.situacao='A' THEN 'Aprovado' WHEN n.situacao='R' THEN 'Reprovado' END AS situacao,
+	t.nome as nome_curso
+FROM "banco".aluno a
+INNER JOIN "banco".matriculado m ON a.matricula = m.aluno
+INNER JOIN "banco".turma       t ON t.id        = m.turma
+INNER JOIN "banco".nota        n ON n.matriculado  = m.id
+ORDER BY a.nome;
+
+-- View 
+CREATE VIEW "banco".boletim AS
+	SELECT 
+		a.matricula,
+		a.nome as nome_aluno,
+		CASE WHEN a.sexo='M' THEN 'Masculino' WHEN a.sexo='F' THEN 'Feminino' END AS sexo,
+		to_char(a.data_nascimento,'DD/MM/YYYY') as data_nascimento,
+		t.id as id_turma,
+		t.nome as nome_turma,
+		t.data_inicio,
+		t.data_fim,
+		n.nota1,
+		n.nota2,
+		n.nota3,
+		n.media,
+		CASE WHEN n.situacao='A' THEN 'Aprovado' WHEN n.situacao='R' THEN 'Reprovado' END AS situacao,
+		t.nome as nome_curso
+	FROM "banco".aluno a
+	INNER JOIN "banco".matriculado m ON a.matricula = m.aluno
+	INNER JOIN "banco".turma       t ON t.id        = m.turma
+	INNER JOIN "banco".nota        n ON n.matriculado  = m.id
+	ORDER BY a.nome;

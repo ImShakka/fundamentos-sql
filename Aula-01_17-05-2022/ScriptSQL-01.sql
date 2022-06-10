@@ -158,7 +158,7 @@ COMMENT ON SEQUENCE "banco".nota_seq_id           IS 'Usada para gerar a chave p
 CREATE DOMAIN "banco".dominio_situacao AS char(1) NOT NULL CONSTRAINT aluno_situacao_check CHECK (VALUE IN ('A', 'R'));
 COMMENT ON DOMAIN "banco".dominio_situacao        IS 'Dominio criado para o campo situacao do aluno. [A] - Aprovado, [R] - Reprovado';
 
--- Cruar tabela nota
+-- Criar tabela nota
 CREATE TABLE "banco".nota (
 	id int DEFAULT nextval('"banco".nota_seq_id') NOT NULL,
 	nota1 decimal(2,2) NOT NULL,
@@ -176,3 +176,52 @@ COMMENT ON COLUMN "banco".nota.nota1              IS 'Primeira nota do aluno';
 COMMENT ON COLUMN "banco".nota.nota2              IS 'Segunda nota do aluno';
 COMMENT ON COLUMN "banco".nota.nota3              IS 'Terceira nota do aluno';
 COMMENT ON COLUMN "banco".nota.situacao           IS 'Indica a situação do aluno: [A] - Aprovado, [R] - Reprovado';
+
+-- *******************
+-- Aula 08 - 09/06/2022
+-- *******************
+
+-- *******************
+-- Tabela Nota - Forma de fazer a situação sem Dominio (forma atual do banco 09/06/2022)
+-- *******************
+
+-- Criar seq_id da tabela nota
+CREATE SEQUENCE "banco".nota_seq_id;
+COMMENT ON SEQUENCE "banco".nota_seq_id           IS 'Usada para gerar a chave primária id da tabela nota automaticamente';
+
+-- Criar tabela nota
+CREATE TABLE "banco".nota (
+	id int DEFAULT nextval('"banco".nota_seq_id') NOT NULL,
+	nota1 real NOT NULL,
+	nota2 real NOT NULL,
+	nota3 real NOT NULL,
+	media real,
+	situacao varchar(1),
+	matriculado int NOT NULL,
+	CONSTRAINT pk_nota_id PRIMARY KEY(id),
+	CONSTRAINT fk_nota_matriculado FOREIGN KEY(matriculado) REFERENCES "banco".matriculado(id)
+);
+
+COMMENT ON TABLE "banco".nota                     IS 'Representa as notas dos alunos matriculados em um determinado curso FIC';
+COMMENT ON COLUMN "banco".nota.id                 IS 'Chave Primária';
+COMMENT ON COLUMN "banco".nota.nota1              IS 'Primeira nota do aluno';
+COMMENT ON COLUMN "banco".nota.nota2              IS 'Segunda nota do aluno';
+COMMENT ON COLUMN "banco".nota.nota3              IS 'Terceira nota do aluno';
+COMMENT ON COLUMN "banco".nota.media              IS 'Média do aluno';
+COMMENT ON COLUMN "banco".nota.situacao           IS 'Indica a situação do aluno: [A] - Aprovado, [R] - Reprovado';
+
+-- Trigger: Dispara um evento na tabela
+-- Toda trigger é associada a uma tabela e precisa ter uma ação, sendo uma FUNCTION
+CREATE FUNCTION "banco".determinar_media_situacao()
+RETURNS TRIGGER AS 
+$BODY$
+	BEGIN
+		NEW.media = (NEW.nota1 + NEW.nota2 + NEW.nota3) / 3.0;
+		IF (NEW.media >= 6.0) THEN NEW.situacao := 'A';
+		ELSE NEW.situacao := 'R';
+		END IF;
+		RETURN NEW;
+	END;
+$BODY$ LANGUAGE plpgsql;
+
+COMMENT ON FUNCTION "banco".determinar_media_situacao IS 'Função da trigger para calcular a média e determinar a situação do aluno'
